@@ -1,4 +1,5 @@
 const express = require('express');
+const { sql } = require('@vercel/postgres');
 
 const app = express();
 
@@ -28,6 +29,9 @@ app.use('/api/cities', (req, res, next) => {
         title: 'BegMeil'
       }
     ];
+
+    const result =
+      sql`CREATE TABLE Cities ( id varchar(255), Name varchar(255) );`;
     
    res.status(200).json(cities);
  });
