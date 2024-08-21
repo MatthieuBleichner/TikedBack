@@ -10,7 +10,7 @@ app.use((req, res, next) => {
    next();
  });
 
-app.use('/api/cities', (req, res, next) => {
+app.post('/api/cities', (req, res, next) => {
    const cities = [
       {
         id: 'Lorient',
@@ -30,10 +30,18 @@ app.use('/api/cities', (req, res, next) => {
       }
     ];
 
-    try {
+   //  try {
+   //    const result =
+   //      sql`CREATE TABLE Pets ( Name varchar(255), Owner varchar(255) );`;
+   //    return res.status(200).json(cities);
+   //  } catch (error) {
+   //    return  res.status(500).json(error);
+   //  }
+
+   try {
       const result =
         sql`CREATE TABLE Pets ( Name varchar(255), Owner varchar(255) );`;
-      return res.status(200).json(cities);
+        res.status(200).json(result);
     } catch (error) {
       return  res.status(500).json(error);
     }
