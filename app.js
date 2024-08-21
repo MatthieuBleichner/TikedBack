@@ -30,8 +30,15 @@ app.use('/api/cities', (req, res, next) => {
       }
     ];
 
-    const result =
-      sql`CREATE TABLE Cities ( id varchar(255), Name varchar(255) );`;
+    try {
+      const result =
+        sql`CREATE TABLE Pets ( Name varchar(255), Owner varchar(255) );`;
+      return res.status(200).json(cities);
+    } catch (error) {
+      return  res.status(500).json(error);
+    }
+   //  const result =
+   //    sql`CREATE TABLE Cities ( id varchar(255), Name varchar(255) );`;
     
    res.status(200).json(cities);
  });
