@@ -1,6 +1,6 @@
 const express = require('express');
 const { sql } = require('@vercel/postgres');
-
+const seed = require('./scripts/seed');
 const app = express();
 
 app.use((req, res, next) => {
@@ -50,4 +50,9 @@ app.post('/api/cities', (req, res, next) => {
     
    res.status(200).json(cities);
  });
+
+//  app.post('/api/seed', (req, res, next) => {
+//    return seed()
+//  });
+
 module.exports = app;
