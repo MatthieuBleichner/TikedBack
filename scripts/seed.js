@@ -1,30 +1,31 @@
 const { sql } = require('@vercel/postgres');
 const bcrypt = require('bcrypt');
 
-const mockedUsers = [ {
-  name: 'Matthieu Bleichner',
-  email: 'matthieu258@hotmail.com',
-  password: 'toto',
-  privilege: 0
-}, {
-  name: 'Charlotte Bleichner',
-  email: 'charlotteb44@hotmail.fr',
-  password: 'toto',
-  privilege: 1
-}]
+const mockedUsers = [
+  {
+    name: 'Matthieu Bleichner',
+    email: 'matthieu258@hotmail.com',
+    password: 'toto',
+    privilege: 0,
+  },
+  {
+    name: 'Charlotte Bleichner',
+    email: 'charlotteb44@hotmail.fr',
+    password: 'toto',
+    privilege: 1,
+  },
+];
 
 async function seedUsers() {
-
   try {
-     // Create the "users" table if it doesn't exist
-     await sql`
+    // Create the "users" table if it doesn't exist
+    await sql`
        DROP TABLE users
      `;
-
-   } catch (error) {
-     console.error('Error seeding users:', error);
-     throw error;
-   }
+  } catch (error) {
+    console.error('Error seeding users:', error);
+    throw error;
+  }
 
   try {
     await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
@@ -180,9 +181,7 @@ async function seedUsers() {
 // }
 
 async function seed() {
-
   await seedUsers();
 }
-
 
 module.exports = seed;
