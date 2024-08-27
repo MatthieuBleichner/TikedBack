@@ -16,48 +16,35 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post('/api/cities', (req, res) => {
-  const cities = [
-    {
-      id: 'Lorient',
-      title: 'Lorient',
-    },
-    {
-      id: 'Quiberon',
-      title: 'Quiberon',
-    },
-    {
-      id: 'Pontivy',
-      title: 'Pontivy',
-    },
-    {
-      id: 'BegMeil',
-      title: 'BegMeil',
-    },
-  ];
-
-  //  try {
-  //    const result =
-  //      sql`CREATE TABLE Pets ( Name varchar(255), Owner varchar(255) );`;
-  //    return res.status(200).json(cities);
-  //  } catch (error) {
-  //    return  res.status(500).json(error);
-  //  }
-
+async function getMarkets(req, res) {
+  console.log('req.query', req.query);
   try {
-    const result = sql`CREATE TABLE Pets ( Name varchar(255), Owner varchar(255) );`;
-    res.status(200).json(result);
+    const result =
+      await sql`SELECT * from markets WHERE cityId=${req.query.cityId}`;
+    res.status(200).json(result.rows);
   } catch (error) {
     return res.status(500).json(error);
   }
-  //  const result =
-  //    sql`CREATE TABLE Cities ( id varchar(255), Name varchar(255) );`;
+}
 
-  res.status(200).json(cities);
+app.use('/api/markets', (req, res) => {
+  return getMarkets(req, res);
 });
 
-//  app.post('/api/seed', (req, res, next) => {
-//    return seed()
-//  });
+async function getCities(res) {
+  try {
+    const result = await sql`SELECT * from cities`;
+    res.status(200).json(result.rows);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+}
+app.use('/api/cities', (req, res) => {
+  return getCities(res);
+});
+
+// app.post('/api/seed', () => {
+//   return seed();
+// });
 
 module.exports = app;
