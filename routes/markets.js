@@ -16,5 +16,6 @@ router.post('/client', marketsController.addClient);
 
 router.use('/balanceSheets', marketsController.getBalanceSheets);
 router.post('/balanceSheet', marketsController.addBalanceSheet);
+router.put('/balanceSheet/:id', marketsController.updateBalanceSheet);
 
 module.exports = router;

@@ -161,6 +161,27 @@ async function addBalanceSheet(req, res) {
   }
 }
 
+async function updateBalanceSheet(req, res) {
+  const id = req.params.id;
+
+  const status = req.body.satus;
+  console.log('req.body', req.body, req.body.status, status);
+
+  if (!id || status === null) {
+    return res.status(500).json('missing properties');
+  }
+
+  try {
+    const result = await sql`
+            UPDATE balanceSheets SET status=${req.body.status} WHERE id=${id}
+            RETURNING *;
+          `;
+    res.status(200).json(result.rows);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+}
+
 module.exports = {
   getMarkets,
   addMarket,
@@ -172,4 +193,5 @@ module.exports = {
   addClient,
   getBalanceSheets,
   addBalanceSheet,
+  updateBalanceSheet,
 };
