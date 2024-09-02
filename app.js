@@ -159,6 +159,19 @@ app.post('/api/client', (req, res) => {
     });
 });
 
+async function getBalanceSheets(req, res) {
+  try {
+    const result =
+      await sql`SELECT * from balanceSheets WHERE marketId=${req.query.marketId} AND date=${req.query.date}`;
+    res.status(200).json(result.rows);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+}
+app.use('/api/balanceSheets', (req, res) => {
+  return getBalanceSheets(req, res);
+});
+
 app.post('/api/balanceSheet', (req, res) => {
   const balance = req.body;
 
