@@ -159,6 +159,32 @@ app.post('/api/client', (req, res) => {
     });
 });
 
+app.post('/api/balanceSheet', (req, res) => {
+  const balance = req.body;
+
+  if (
+    !balance ||
+    !balance.date ||
+    !balance.marketId ||
+    !balance.clientId ||
+    balance.status === null
+  ) {
+    return res.status(500).json('missing properties');
+  }
+  sql`
+        INSERT INTO balanceSheets (id, date, marketId, clientId, status)
+        VALUES (uuid_generate_v4(), ${balance.date}, ${balance.marketId}, ${balance.clientId}, ${balance.status})
+        ON CONFLICT (id) DO NOTHING
+        RETURNING *;
+      `
+    .then((result) => {
+      res.status(200).json(result.rows);
+    })
+    .catch((error) => {
+      return res.status(500).json(error);
+    });
+});
+
 // app.post('/api/seed', () => {
 //   return seed();
 // });

@@ -350,6 +350,19 @@ async function seedCities() {
 
     console.log(`Seeded ${util.inspect(insertedClients.length)} clients`);
 
+    // create balanceSheet table
+    await sql`
+        CREATE TABLE IF NOT EXISTS balanceSheets (
+        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+        date DATE NOT NULL,
+        marketId UUID NOT NULL,
+        clientId UUID NOT NULL,
+        status INT NOT NULL,
+        FOREIGN KEY (marketId) REFERENCES markets (id)
+        FOREIGN KEY (clientId) REFERENCES clients (id)
+      );
+    `;
+
     return {
       createTable,
       cities: insertedCities,
