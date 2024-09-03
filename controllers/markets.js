@@ -34,7 +34,7 @@ async function addMarket(req, res) {
   }
 }
 
-async function getCities(res) {
+async function getCities(req, res) {
   try {
     const result = await sql`SELECT * from cities`;
     res.status(200).json(result.rows);
@@ -164,10 +164,7 @@ async function addBalanceSheet(req, res) {
 async function updateBalanceSheet(req, res) {
   const id = req.params.id;
 
-  const status = req.body.satus;
-  console.log('req.body', req.body, req.body.status, status);
-
-  if (!id || status === null) {
+  if (!id) {
     return res.status(500).json('missing properties');
   }
 
