@@ -90,7 +90,6 @@ async function addPricing(req, res) {
 }
 
 async function getClients(req, res) {
-  console.log('getclients', req);
   try {
     const result =
       await sql`SELECT * from clients WHERE cityId=${req.query.cityId}`;
