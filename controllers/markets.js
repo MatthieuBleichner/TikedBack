@@ -3,7 +3,7 @@ const { sql } = require('@vercel/postgres');
 async function getMarkets(req, res) {
   try {
     const result =
-      await sql`SELECT * from markets WHERE cityId=${req.query.cityId}`;
+      await sql`SELECT * from markets WHERE city_id=${req.query.cityId}`;
     res.status(200).json(result.rows);
   } catch (error) {
     return res.status(500).json(error);
@@ -15,7 +15,7 @@ async function addMarket(req, res) {
   if (
     !market ||
     !market.name ||
-    !market.cityId ||
+    !market.city_id ||
     !market.days ||
     !market.color
   ) {
@@ -23,8 +23,8 @@ async function addMarket(req, res) {
   }
   try {
     const result = await sql`
-      INSERT INTO markets (id, name, cityId, days, color)
-      VALUES (uuid_generate_v4(), ${market.name}, ${market.cityId}, ${market.days}, ${market.color})
+      INSERT INTO markets (id, name, city_id, days, color)
+      VALUES (uuid_generate_v4(), ${market.name}, ${market.city_id}, ${market.days}, ${market.color})
       ON CONFLICT (id) DO NOTHING
       RETURNING *;
     `;
@@ -64,7 +64,7 @@ async function addCity(req, res) {
 async function getPricings(req, res) {
   try {
     const result =
-      await sql`SELECT * from pricing WHERE marketId=${req.query.marketId}`;
+      await sql`SELECT * from pricing WHERE market_id=${req.query.marketId}`;
     res.status(200).json(result.rows);
   } catch (error) {
     return res.status(500).json(error);
@@ -73,13 +73,13 @@ async function getPricings(req, res) {
 
 async function addPricing(req, res) {
   const pricing = req.body;
-  if (!pricing || !pricing.name || !pricing.marketId || !pricing.price) {
+  if (!pricing || !pricing.name || !pricing.market_id || !pricing.price) {
     return res.status(500).json('missing client properties');
   }
   try {
     const result = await sql`
-        INSERT INTO pricing (id, name, marketId, price)
-        VALUES (uuid_generate_v4(), ${pricing.name}, ${pricing.marketId}, ${pricing.price})
+        INSERT INTO pricing (id, name, market_id, price)
+        VALUES (uuid_generate_v4(), ${pricing.name}, ${pricing.market_id}, ${pricing.price})
         ON CONFLICT (id) DO NOTHING
         RETURNING *;
         `;
@@ -92,7 +92,7 @@ async function addPricing(req, res) {
 async function getClients(req, res) {
   try {
     const result =
-      await sql`SELECT * from clients WHERE cityId=${req.query.cityId}`;
+      await sql`SELECT * from clients WHERE city_id=${req.query.city_id}`;
     res.status(200).json(result.rows);
   } catch (error) {
     return res.status(500).json(error);
@@ -101,11 +101,23 @@ async function getClients(req, res) {
 
 async function addClient(req, res) {
   const client = req.body;
+  console.log(
+    'client',
+    client,
+    '!client.first_name',
+    !client.first_name,
+    '!client.last_name',
+    !client.last_name,
+    '!client.city_id',
+    !client.city_id,
+    '!client.siren',
+    !client.siren,
+  );
   if (
     !client ||
-    !client.firstName ||
-    !client.lastName ||
-    !client.cityId ||
+    !client.first_name ||
+    !client.last_name ||
+    !client.city_id ||
     !client.siren
   ) {
     return res.status(500).json('missing client properties');
@@ -113,8 +125,8 @@ async function addClient(req, res) {
 
   try {
     const result = await sql`
-          INSERT INTO clients (id, firstName, lastName, cityId, siren)
-          VALUES (uuid_generate_v4(), ${client.firstName}, ${client.lastName}, ${client.cityId}, ${client.siren})
+          INSERT INTO clients (id, first_name, last_name, city_id, siren)
+          VALUES (uuid_generate_v4(), ${client.first_name}, ${client.last_name}, ${client.city_id}, ${client.siren})
           ON CONFLICT (id) DO NOTHING
           RETURNING *;
         `;
@@ -127,7 +139,7 @@ async function addClient(req, res) {
 async function getBalanceSheets(req, res) {
   try {
     const result =
-      await sql`SELECT * from balanceSheets WHERE marketId=${req.query.marketId} AND date=${req.query.date}`;
+      await sql`SELECT * from balanceSheets WHERE market_id=${req.query.marketId} AND date=${req.query.date}`;
     res.status(200).json(result.rows);
   } catch (error) {
     return res.status(500).json(error);
@@ -140,7 +152,7 @@ async function addBalanceSheet(req, res) {
   if (
     !balance ||
     !balance.date ||
-    !balance.marketId ||
+    !balance.market_id ||
     !balance.clientId ||
     balance.status === null
   ) {
@@ -149,8 +161,8 @@ async function addBalanceSheet(req, res) {
 
   try {
     const result = await sql`
-          INSERT INTO balanceSheets (id, date, marketId, clientId, status)
-          VALUES (uuid_generate_v4(), ${balance.date}, ${balance.marketId}, ${balance.clientId}, ${balance.status})
+          INSERT INTO balanceSheets (id, date, market_id, clientId, status)
+          VALUES (uuid_generate_v4(), ${balance.date}, ${balance.market_id}, ${balance.clientId}, ${balance.status})
           ON CONFLICT (id) DO NOTHING
           RETURNING *;
         `;

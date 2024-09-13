@@ -211,6 +211,16 @@ const MockedPricings = [
   },
 ];
 async function seedCities() {
+  // try {
+  //   // Create the "users" table if it doesn't exist
+  //   await sql`
+  //      DROP TABLE balancesheets
+  //    `;
+  // } catch (error) {
+  //   console.error('Error seeding cities:', error);
+  //   throw error;
+  // }
+
   try {
     // Create the "users" table if it doesn't exist
     await sql`
@@ -228,6 +238,16 @@ async function seedCities() {
      `;
   } catch (error) {
     console.error('Error seeding markets:', error);
+    throw error;
+  }
+
+  try {
+    // Create the "users" table if it doesn't exist
+    await sql`
+       DROP TABLE clients
+     `;
+  } catch (error) {
+    console.error('Error seeding cities:', error);
     throw error;
   }
 
@@ -273,17 +293,17 @@ async function seedCities() {
     CREATE TABLE IF NOT EXISTS markets (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
-    cityId UUID NOT NULL,
+    city_id UUID NOT NULL,
     days VARCHAR(255),
     color VARCHAR(255),
-    FOREIGN KEY (cityId) REFERENCES cities (id)
+    FOREIGN KEY (city_id) REFERENCES cities (id)
   );
 `;
 
     const insertedMarkets = await Promise.all(
       MockedMarkets.map(
         (market) => sql`
-    INSERT INTO markets (id, name, cityId, days, color)
+    INSERT INTO markets (id, name, city_id, days, color)
     VALUES (uuid_generate_v4(), ${market.name}, ${insertedCities[market.cityIndex].rows[0].id}, ${market.dates}, ${market.color})
     ON CONFLICT (id) DO NOTHING
     RETURNING *;
@@ -302,9 +322,9 @@ async function seedCities() {
     CREATE TABLE IF NOT EXISTS pricing (
     id VARCHAR(255) PRIMARY KEY UNIQUE,
     name VARCHAR(255) NOT NULL,
-    marketId UUID NOT NULL,
+    market_id UUID NOT NULL,
     price FLOAT,
-    FOREIGN KEY (marketId) REFERENCES markets (id)
+    FOREIGN KEY (market_id) REFERENCES markets (id)
   );
 `;
 
@@ -315,7 +335,7 @@ async function seedCities() {
           `${insertedMarkets[pricing.marketIndex].rows[0].name}-${pricing.name}`,
         );
         sql`
-      INSERT INTO pricing (id, name, marketId, price)
+      INSERT INTO pricing (id, name, market_id, price)
       VALUES (uuid_generate_v4(), ${pricing.name}, ${insertedMarkets[pricing.marketIndex].rows[0].id}, ${pricing.price})
       ON CONFLICT (id) DO NOTHING
       RETURNING *;
@@ -329,18 +349,18 @@ async function seedCities() {
     await sql`
         CREATE TABLE IF NOT EXISTS clients (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-        firstName VARCHAR(255) NOT NULL,
-        lastName VARCHAR(255) NOT NULL,
-        cityId UUID NOT NULL,
+        first_name VARCHAR(255) NOT NULL,
+        last_name VARCHAR(255) NOT NULL,
+        city_id UUID NOT NULL,
         siren VARCHAR(255),
-        FOREIGN KEY (cityId) REFERENCES cities (id)
+        FOREIGN KEY (city_id) REFERENCES cities (id)
       );
     `;
 
     const insertedClients = await Promise.all(
       MockedClients.map(
         (client) => sql`
-        INSERT INTO clients (id, firstName, lastName, cityId, siren)
+        INSERT INTO clients (id, first_name, last_name, city_id, siren)
         VALUES (uuid_generate_v4(), ${client.firstName}, ${client.lastName}, ${insertedCities[client.cityIndex].rows[0].id}, ${client.siren})
         ON CONFLICT (id) DO NOTHING
         RETURNING *;
@@ -355,11 +375,11 @@ async function seedCities() {
         CREATE TABLE IF NOT EXISTS balanceSheets (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
         date DATE NOT NULL,
-        marketId UUID NOT NULL,
-        clientId UUID NOT NULL,
+        market_id UUID NOT NULL,
+        client_id UUID NOT NULL,
         status INT NOT NULL,
-        FOREIGN KEY (marketId) REFERENCES markets (id)
-        FOREIGN KEY (clientId) REFERENCES clients (id)
+        FOREIGN KEY (market_id) REFERENCES markets (id),
+        FOREIGN KEY (client_id) REFERENCES clients (id)
       );
     `;
 
