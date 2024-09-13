@@ -139,7 +139,7 @@ async function addClient(req, res) {
 async function getBalanceSheets(req, res) {
   try {
     const result =
-      await sql`SELECT * from balanceSheets WHERE market_id=${req.query.marketId} AND date=${req.query.date}`;
+      await sql`SELECT * from balanceSheets WHERE market_id=${req.query.marketId}`;
     res.status(200).json(result.rows);
   } catch (error) {
     return res.status(500).json(error);
