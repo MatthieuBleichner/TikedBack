@@ -92,7 +92,7 @@ async function addPricing(req, res) {
 async function getClients(req, res) {
   try {
     const result =
-      await sql`SELECT * from clients WHERE city_id=${req.query.city_id}`;
+      await sql`SELECT * from clients WHERE city_id=${req.query.cityId}`;
     res.status(200).json(result.rows);
   } catch (error) {
     return res.status(500).json(error);
