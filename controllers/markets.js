@@ -161,8 +161,8 @@ async function addBalanceSheet(req, res) {
 
   try {
     const result = await sql`
-          INSERT INTO balanceSheets (id, date, market_id, clientId, status)
-          VALUES (uuid_generate_v4(), ${balance.date}, ${balance.market_id}, ${balance.clientId}, ${balance.status})
+          INSERT INTO balanceSheets (id, date, market_id)
+          VALUES (uuid_generate_v4(), ${balance.date}, ${balance.market_id})
           ON CONFLICT (id) DO NOTHING
           RETURNING *;
         `;

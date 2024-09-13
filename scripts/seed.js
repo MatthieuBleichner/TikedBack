@@ -376,10 +376,7 @@ async function seedCities() {
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
         date DATE NOT NULL,
         market_id UUID NOT NULL,
-        client_id UUID NOT NULL,
-        status INT NOT NULL,
-        FOREIGN KEY (market_id) REFERENCES markets (id),
-        FOREIGN KEY (client_id) REFERENCES clients (id)
+        FOREIGN KEY (market_id) REFERENCES markets (id)
       );
     `;
 
