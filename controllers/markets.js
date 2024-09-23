@@ -101,18 +101,6 @@ async function getClients(req, res) {
 
 async function addClient(req, res) {
   const client = req.body;
-  console.log(
-    'client',
-    client,
-    '!client.first_name',
-    !client.first_name,
-    '!client.last_name',
-    !client.last_name,
-    '!client.city_id',
-    !client.city_id,
-    '!client.siren',
-    !client.siren,
-  );
   if (
     !client ||
     !client.first_name ||
@@ -149,13 +137,7 @@ async function getBalanceSheets(req, res) {
 async function addBalanceSheet(req, res) {
   const balance = req.body;
 
-  if (
-    !balance ||
-    !balance.date ||
-    !balance.market_id ||
-    !balance.clientId ||
-    balance.status === null
-  ) {
+  if (!balance || !balance.date || !balance.market_id) {
     return res.status(500).json('missing properties');
   }
 
@@ -190,6 +172,53 @@ async function updateBalanceSheet(req, res) {
   }
 }
 
+async function getBalanceSheetDetails(req, res) {
+  try {
+    const result =
+      await sql`SELECT * from balanceSheetDetails WHERE balance_sheet_id=${req.query.balanceSheetId}`;
+    res.status(200).json(result.rows);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+}
+
+async function addBalanceSheetDetails(req, res) {
+  const details = req.body;
+
+  if (
+    !details ||
+    !details.balance_sheet_id ||
+    !details.client_id ||
+    !details.total
+  ) {
+    return res.status(500).json('missing properties');
+  }
+
+  // create balanceSheet table
+  await sql`
+      CREATE TABLE IF NOT EXISTS balanceSheetDetails (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      client_id UUID NOT NULL,
+      balance_sheet_id UUID NOT NULL,
+      total FLOAT,
+      FOREIGN KEY (balance_sheet_id) REFERENCES balanceSheets (id),
+      FOREIGN KEY (client_id) REFERENCES clients (id)
+    );
+  `;
+
+  try {
+    const result = await sql`
+          INSERT INTO balanceSheetDetails (id, balance_sheet_id, client_id, total)
+          VALUES (uuid_generate_v4(), ${details.balance_sheet_id}, ${details.client_id}, ${details.total})
+          ON CONFLICT (id) DO NOTHING
+          RETURNING *;
+        `;
+    res.status(200).json(result.rows);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+}
+
 module.exports = {
   getMarkets,
   addMarket,
@@ -202,4 +231,6 @@ module.exports = {
   getBalanceSheets,
   addBalanceSheet,
   updateBalanceSheet,
+  getBalanceSheetDetails,
+  addBalanceSheetDetails,
 };
