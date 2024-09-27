@@ -2,20 +2,7 @@ const { sql } = require('@vercel/postgres');
 const bcrypt = require('bcrypt');
 const util = require('util');
 
-const mockedUsers = [
-  {
-    name: 'Matthieu Bleichner',
-    email: 'matthieu258@hotmail.com',
-    password: 'toto',
-    privilege: 0,
-  },
-  {
-    name: 'Charlotte Bleichner',
-    email: 'charlotteb44@hotmail.fr',
-    password: 'toto',
-    privilege: 1,
-  },
-];
+const mockedUsers = [];
 
 async function seedUsers() {
   try {
@@ -131,26 +118,35 @@ const MockedMarkets = [
     dates: 'J,V,S,D',
     color: '#64b5f6',
   },
+  {
+    id: 'MarcheDuDimanche',
+    name: 'Marché du Dimanche',
+    cityIndex: '3',
+    dates: 'D',
+    color: '#651fff',
+  },
+  {
+    id: 'MarchéEglise',
+    name: 'Marché de l Eglise',
+    cityIndex: '4',
+    dates: 'D',
+    color: '#ef5350',
+  },
+  {
+    id: 'MarcheDimanche',
+    name: 'Marché du dimanche matin',
+    cityIndex: '5',
+    dates: 'D',
+    color: '#64b5f6',
+  },
 ];
 
 const MockedClients = [
   {
-    firstName: 'toto',
-    lastName: 'LeMarchanddeTapis',
+    firstName: 'Matthieu',
+    lastName: 'Bleichner',
     cityIndex: '0',
     siren: '111111111',
-  },
-  {
-    firstName: 'tata',
-    lastName: 'La Bouchere',
-    cityIndex: '0',
-    siren: '222222222',
-  },
-  {
-    firstName: 'tutu',
-    lastName: 'Le Boulanger',
-    cityIndex: '1',
-    siren: '33333333',
   },
 ];
 
@@ -211,15 +207,25 @@ const MockedPricings = [
   },
 ];
 async function seedCities() {
-  // try {
-  //   // Create the "users" table if it doesn't exist
-  //   await sql`
-  //      DROP TABLE balancesheets
-  //    `;
-  // } catch (error) {
-  //   console.error('Error seeding cities:', error);
-  //   throw error;
-  // }
+  try {
+    // Create the "users" table if it doesn't exist
+    await sql`
+       DROP TABLE balanceSheetDetails
+     `;
+  } catch (error) {
+    console.error('Error deleting balanceSheetDetails:', error);
+    throw error;
+  }
+
+  try {
+    // Create the "users" table if it doesn't exist
+    await sql`
+       DROP TABLE balancesheets
+     `;
+  } catch (error) {
+    console.error('Error deleting cities:', error);
+    throw error;
+  }
 
   try {
     // Create the "users" table if it doesn't exist
@@ -389,80 +395,6 @@ async function seedCities() {
     throw error;
   }
 }
-
-// async function seedCustomers(client) {
-//   try {
-//     await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
-
-//     // Create the "customers" table if it doesn't exist
-//     const createTable = await client.sql`
-//       CREATE TABLE IF NOT EXISTS customers (
-//         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-//         name VARCHAR(255) NOT NULL,
-//         email VARCHAR(255) NOT NULL,
-//         image_url VARCHAR(255) NOT NULL
-//       );
-//     `;
-
-//     console.log(`Created "customers" table`);
-
-//     // Insert data into the "customers" table
-//     const insertedCustomers = await Promise.all(
-//       customers.map(
-//         (customer) => client.sql`
-//         INSERT INTO customers (id, name, email, image_url)
-//         VALUES (${customer.id}, ${customer.name}, ${customer.email}, ${customer.image_url})
-//         ON CONFLICT (id) DO NOTHING;
-//       `,
-//       ),
-//     );
-
-//     console.log(`Seeded ${insertedCustomers.length} customers`);
-
-//     return {
-//       createTable,
-//       customers: insertedCustomers,
-//     };
-//   } catch (error) {
-//     console.error('Error seeding customers:', error);
-//     throw error;
-//   }
-// }
-
-// async function seedRevenue(client) {
-//   try {
-//     // Create the "revenue" table if it doesn't exist
-//     const createTable = await client.sql`
-//       CREATE TABLE IF NOT EXISTS revenue (
-//         month VARCHAR(4) NOT NULL UNIQUE,
-//         revenue INT NOT NULL
-//       );
-//     `;
-
-//     console.log(`Created "revenue" table`);
-
-//     // Insert data into the "revenue" table
-//     const insertedRevenue = await Promise.all(
-//       revenue.map(
-//         (rev) => client.sql`
-//         INSERT INTO revenue (month, revenue)
-//         VALUES (${rev.month}, ${rev.revenue})
-//         ON CONFLICT (month) DO NOTHING;
-//       `,
-//       ),
-//     );
-
-//     console.log(`Seeded ${insertedRevenue.length} revenue`);
-
-//     return {
-//       createTable,
-//       revenue: insertedRevenue,
-//     };
-//   } catch (error) {
-//     console.error('Error seeding revenue:', error);
-//     throw error;
-//   }
-// }
 
 async function seed() {
   await seedUsers();
