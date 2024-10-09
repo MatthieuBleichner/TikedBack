@@ -8,7 +8,7 @@ async function seedUsers() {
   try {
     // Create the "users" table if it doesn't exist
     await sql`
-       DROP TABLE users
+       DROP TABLE IF EXISTS users
      `;
   } catch (error) {
     console.error('Error seeding users:', error);
@@ -210,7 +210,7 @@ async function seedCities() {
   try {
     // Create the "users" table if it doesn't exist
     await sql`
-       DROP TABLE balanceSheetDetails
+       DROP TABLE IF EXISTS balanceSheetDetails
      `;
   } catch (error) {
     console.error('Error deleting balanceSheetDetails:', error);
@@ -220,7 +220,7 @@ async function seedCities() {
   try {
     // Create the "users" table if it doesn't exist
     await sql`
-       DROP TABLE balancesheets
+       DROP TABLE IF EXISTS balancesheets
      `;
   } catch (error) {
     console.error('Error deleting cities:', error);
@@ -230,7 +230,7 @@ async function seedCities() {
   try {
     // Create the "users" table if it doesn't exist
     await sql`
-       DROP TABLE pricing
+       DROP TABLE IF EXISTS pricing
      `;
   } catch (error) {
     console.error('Error seeding pricing:', error);
@@ -240,7 +240,7 @@ async function seedCities() {
   try {
     // Create the "users" table if it doesn't exist
     await sql`
-       DROP TABLE markets
+       DROP TABLE IF EXISTS markets
      `;
   } catch (error) {
     console.error('Error seeding markets:', error);
@@ -250,7 +250,7 @@ async function seedCities() {
   try {
     // Create the "users" table if it doesn't exist
     await sql`
-       DROP TABLE clients
+       DROP TABLE IF EXISTS clients
      `;
   } catch (error) {
     console.error('Error seeding cities:', error);
@@ -260,7 +260,7 @@ async function seedCities() {
   try {
     // Create the "users" table if it doesn't exist
     await sql`
-       DROP TABLE cities
+       DROP TABLE IF EXISTS cities
      `;
   } catch (error) {
     console.error('Error seeding cities:', error);
@@ -383,6 +383,18 @@ async function seedCities() {
         date DATE NOT NULL,
         market_id UUID NOT NULL,
         FOREIGN KEY (market_id) REFERENCES markets (id)
+      );
+    `;
+
+    // create balanceSheetDetails table
+    await sql`
+        CREATE TABLE IF NOT EXISTS balanceSheetDetails (
+        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+        client_id UUID NOT NULL,
+        balance_sheet_id UUID NOT NULL,
+        total FLOAT,
+        FOREIGN KEY (balance_sheet_id) REFERENCES balanceSheets (id),
+        FOREIGN KEY (client_id) REFERENCES clients (id)
       );
     `;
 
