@@ -147,6 +147,11 @@ const MockedClients = [
     lastName: 'Bleichner',
     cityIndex: '0',
     siren: '111111111',
+    postal_code: '44240',
+    city: 'Sucé sur Erdre',
+    address: '699 route de la grande Bodinière',
+    mail: 'matthieu258@hotmail.com',
+    job: 'boulanger',
   },
 ];
 
@@ -210,10 +215,10 @@ async function seedCities() {
   try {
     // Create the "users" table if it doesn't exist
     await sql`
-       DROP TABLE IF EXISTS balanceSheetDetails
+       DROP TABLE IF EXISTS invoices
      `;
   } catch (error) {
-    console.error('Error deleting balanceSheetDetails:', error);
+    console.error('Error deleting invoices:', error);
     throw error;
   }
 
@@ -274,7 +279,8 @@ async function seedCities() {
     const createTable = await sql`
     CREATE TABLE IF NOT EXISTS cities (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE
+    name TEXT NOT NULL UNIQUE,
+    invoice_prefix SERIAL
   );
 `;
 
@@ -302,6 +308,7 @@ async function seedCities() {
     city_id UUID NOT NULL,
     days VARCHAR(255),
     color VARCHAR(255),
+    invoice_prefix SERIAL,
     FOREIGN KEY (city_id) REFERENCES cities (id)
   );
 `;
@@ -358,6 +365,11 @@ async function seedCities() {
         first_name VARCHAR(255) NOT NULL,
         last_name VARCHAR(255) NOT NULL,
         city_id UUID NOT NULL,
+        postal_code INTEGER,
+        city VARCHAR(255),
+        address VARCHAR(255),
+        mail VARCHAR(255),
+        job VARCHAR(255),
         siren VARCHAR(255),
         FOREIGN KEY (city_id) REFERENCES cities (id)
       );
@@ -366,8 +378,8 @@ async function seedCities() {
     const insertedClients = await Promise.all(
       MockedClients.map(
         (client) => sql`
-        INSERT INTO clients (id, first_name, last_name, city_id, siren)
-        VALUES (uuid_generate_v4(), ${client.firstName}, ${client.lastName}, ${insertedCities[client.cityIndex].rows[0].id}, ${client.siren})
+        INSERT INTO clients (id, first_name, last_name, city_id, siren, postal_code, city, address, mail, job)
+        VALUES (uuid_generate_v4(), ${client.firstName}, ${client.lastName}, ${insertedCities[client.cityIndex].rows[0].id}, ${client.siren}, ${client.postal_code}, ${client.city}, ${client.address}, ${client.mail}, ${client.job})
         ON CONFLICT (id) DO NOTHING
         RETURNING *;
       `,
@@ -386,13 +398,15 @@ async function seedCities() {
       );
     `;
 
-    // create balanceSheetDetails table
+    // create invoices table
     await sql`
-        CREATE TABLE IF NOT EXISTS balanceSheetDetails (
+        CREATE TABLE IF NOT EXISTS invoices (
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
         client_id UUID NOT NULL,
         balance_sheet_id UUID NOT NULL,
         total FLOAT,
+        paiement_type paiement_method,
+        invoice_id VARCHAR(255),
         FOREIGN KEY (balance_sheet_id) REFERENCES balanceSheets (id),
         FOREIGN KEY (client_id) REFERENCES clients (id)
       );
@@ -413,4 +427,15 @@ async function seed() {
   await seedCities();
 }
 
-module.exports = seed;
+async function update() {
+  try {
+    await sql`
+      ALTER TABLE invoices
+      ADD paiement_type paiement_method
+  `;
+  } catch (error) {
+    console.error('Error updating clients:', error);
+    throw error;
+  }
+}
+module.exports = { seed, update };

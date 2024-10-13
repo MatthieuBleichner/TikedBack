@@ -113,8 +113,8 @@ async function addClient(req, res) {
 
   try {
     const result = await sql`
-          INSERT INTO clients (id, first_name, last_name, city_id, siren)
-          VALUES (uuid_generate_v4(), ${client.first_name}, ${client.last_name}, ${client.city_id}, ${client.siren})
+          INSERT INTO clients (id, first_name, last_name, city_id, siren, postal_code, city, address, mail, job)
+          VALUES (uuid_generate_v4(), ${client.first_name}, ${client.last_name}, ${client.city_id}, ${client.siren}, ${client.postal_code}, ${client.city}, ${client.address}, ${client.mail}, ${client.job})
           ON CONFLICT (id) DO NOTHING
           RETURNING *;
         `;
@@ -172,19 +172,20 @@ async function updateBalanceSheet(req, res) {
   }
 }
 
-async function getBalanceSheetDetails(req, res) {
+async function getInvoices(req, res) {
   try {
     const result =
-      await sql`SELECT * from balanceSheetDetails WHERE balance_sheet_id=${req.query.balanceSheetId}`;
+      await sql`SELECT * from invoices WHERE balance_sheet_id=${req.query.balanceSheetId}`;
     res.status(200).json(result.rows);
   } catch (error) {
     return res.status(500).json(error);
   }
 }
 
-async function addBalanceSheetDetails(req, res) {
+async function addInvoice(req, res) {
   const details = req.body;
 
+  console.log('add invoide dans le back');
   if (
     !details ||
     !details.balance_sheet_id ||
@@ -194,22 +195,37 @@ async function addBalanceSheetDetails(req, res) {
     return res.status(500).json('missing properties');
   }
 
+  //create type paiement_method
+  await sql`
+    DO $$
+      BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'paiement_method') THEN
+            create type paiement_method AS ENUM ('cash', 'cb', 'check');
+          END IF;
+      END
+    $$;
+  `;
+
   // create balanceSheet table
   await sql`
-      CREATE TABLE IF NOT EXISTS balanceSheetDetails (
+      CREATE TABLE IF NOT EXISTS invoices (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
       client_id UUID NOT NULL,
       balance_sheet_id UUID NOT NULL,
       total FLOAT,
+      paiement_type paiement_method,
+      invoice_id VARCHAR(255),
       FOREIGN KEY (balance_sheet_id) REFERENCES balanceSheets (id),
       FOREIGN KEY (client_id) REFERENCES clients (id)
     );
   `;
 
+  console.log('details', details);
+
   try {
     const result = await sql`
-          INSERT INTO balanceSheetDetails (id, balance_sheet_id, client_id, total)
-          VALUES (uuid_generate_v4(), ${details.balance_sheet_id}, ${details.client_id}, ${details.total})
+          INSERT INTO invoices (id, balance_sheet_id, client_id, total, paiement_type, invoice_id)
+          VALUES (uuid_generate_v4(), ${details.balance_sheet_id}, ${details.client_id}, ${details.total}, ${details.paiement_type}, ${details.invoice_id})
           ON CONFLICT (id) DO NOTHING
           RETURNING *;
         `;
@@ -231,6 +247,6 @@ module.exports = {
   getBalanceSheets,
   addBalanceSheet,
   updateBalanceSheet,
-  getBalanceSheetDetails,
-  addBalanceSheetDetails,
+  getInvoices,
+  addInvoice,
 };
