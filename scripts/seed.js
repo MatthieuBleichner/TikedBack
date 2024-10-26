@@ -161,54 +161,63 @@ const MockedPricings = [
     name: 'Abonnement annuel',
     marketIndex: '0',
     price: 2,
+    dynamic_unit: 'none',
   },
   {
     id: 'GrandMarcheDelorient-Ponctuel',
     name: 'Abonnement saison',
     marketIndex: '0',
     price: 3,
+    dynamic_unit: 'none',
   },
   {
     id: 'GrandMarcheDelorient-Autre',
     name: 'Electricite',
     marketIndex: '0',
     price: 4,
+    dynamic_unit: 'none',
   },
   {
     id: 'GrandMarcheDelorient-Autre',
     name: 'Metrage',
     marketIndex: '0',
     price: 4,
+    dynamic_unit: 'meters',
   },
   {
     id: 'MarchéDuLundi-Abonné',
     name: 'Abonné',
     marketIndex: '1',
     price: 2.5,
+    dynamic_unit: 'none',
   },
   {
     id: 'BraderieDuWeekend-Abonné',
     name: 'Abonné',
     marketIndex: '2',
     price: 2.5,
+    dynamic_unit: 'none',
   },
   {
     id: 'MarcheDuVarquez-Abonné',
     name: 'Abonné',
     marketIndex: '3',
     price: 1.5,
+    dynamic_unit: 'none',
   },
   {
     id: 'MarchéPortHaliguen-Abonné',
     name: 'Abonné',
     marketIndex: '4',
     price: 5.5,
+    dynamic_unit: 'none',
   },
   {
     id: 'MarcheDeNoel-Abonné',
     name: 'Abonné',
     marketIndex: '5',
     price: 0.5,
+    dynamic_unit: 'none',
   },
 ];
 async function seedCities() {
@@ -330,6 +339,17 @@ async function seedCities() {
       console.log(market.rows);
     });
 
+    //create type dynamic_unit
+    await sql`
+    DO $$
+      BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'dynamic_unit') THEN
+            create type dynamic_unit AS ENUM ('none', 'meters', 'hours');
+          END IF;
+      END
+    $$;
+  `;
+
     // create pricing table
     await sql`
     CREATE TABLE IF NOT EXISTS pricing (
@@ -337,6 +357,7 @@ async function seedCities() {
     name VARCHAR(255) NOT NULL,
     market_id UUID NOT NULL,
     price FLOAT,
+    dynamic_unit dynamic_unit,
     FOREIGN KEY (market_id) REFERENCES markets (id)
   );
 `;
@@ -348,8 +369,8 @@ async function seedCities() {
           `${insertedMarkets[pricing.marketIndex].rows[0].name}-${pricing.name}`,
         );
         sql`
-      INSERT INTO pricing (id, name, market_id, price)
-      VALUES (uuid_generate_v4(), ${pricing.name}, ${insertedMarkets[pricing.marketIndex].rows[0].id}, ${pricing.price})
+      INSERT INTO pricing (id, name, market_id, price, dynamic_unit)
+      VALUES (uuid_generate_v4(), ${pricing.name}, ${insertedMarkets[pricing.marketIndex].rows[0].id}, ${pricing.price}, ${pricing.dynamic_unit})
       ON CONFLICT (id) DO NOTHING
       RETURNING *;
     `;
