@@ -19,7 +19,9 @@ async function signup(req, res) {
 
 async function login(req, res) {
   try {
+    console.log('req.query.id', req.query.id);
     const userResult = await sql`SELECT * from users WHERE id=${req.query.id}`;
+    console.log('userResult', userResult);
     if (!userResult.rows.length) {
       res.status(401).json({ message: 'unknown user' });
       return;
