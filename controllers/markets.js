@@ -165,9 +165,9 @@ async function updateBalanceSheet(req, res) {
 
   try {
     const result = await sql`
-            UPDATE balanceSheets SET status=${req.body.status} WHERE id=${id}
-            RETURNING *;
-          `;
+      UPDATE balanceSheets SET status=${req.body.status} WHERE id=${id}
+      RETURNING *;
+    `;
     res.status(200).json(result.rows);
   } catch (error) {
     return res.status(500).json(error);
@@ -187,7 +187,6 @@ async function getInvoices(req, res) {
 async function addInvoice(req, res) {
   const details = req.body;
 
-  console.log('add invoide dans le back');
   if (
     !details ||
     !details.balance_sheet_id ||
@@ -221,8 +220,6 @@ async function addInvoice(req, res) {
       FOREIGN KEY (client_id) REFERENCES clients (id)
     );
   `;
-
-  console.log('details', details);
 
   try {
     const result = await sql`
