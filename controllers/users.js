@@ -37,7 +37,7 @@ async function login(req, res) {
       return;
     }
 
-    console.log('ici 2');
+    console.log('ici 2', !!process?.env?.JWT_SECRET);
     res.status(200).json({
       userId: user.id,
       token: jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
@@ -45,6 +45,7 @@ async function login(req, res) {
       }),
     });
   } catch (error) {
+    console.log('ici error catched');
     return res.status(500).json(error);
   }
 }
