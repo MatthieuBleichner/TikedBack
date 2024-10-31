@@ -26,6 +26,7 @@ async function login(req, res) {
       res.status(401).json({ message: 'unknown user' });
       return;
     }
+    console.log('ici 1');
     const user = userResult.rows[0];
     const validPassword = await bcrypt.compare(
       req.body.password,
@@ -36,6 +37,7 @@ async function login(req, res) {
       return;
     }
 
+    console.log('ici 2');
     res.status(200).json({
       userId: user.id,
       token: jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
