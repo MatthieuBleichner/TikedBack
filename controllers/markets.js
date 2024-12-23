@@ -34,6 +34,21 @@ async function addMarket(req, res) {
   }
 }
 
+async function deleteMarket(req, res) {
+  const id = req.params.id;
+  if (!id) {
+    return res.status(500).json('id is missing');
+  }
+  try {
+    const result = await sql`
+      DELETE FROM markets WHERE id=${id};
+    `;
+    res.status(200).json(result.rows);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+}
+
 async function getCities(req, res) {
   try {
     const result = await sql`SELECT * from cities`;
@@ -78,8 +93,8 @@ async function addPricing(req, res) {
   }
   try {
     const result = await sql`
-        INSERT INTO pricing (id, name, market_id, price)
-        VALUES (uuid_generate_v4(), ${pricing.name}, ${pricing.market_id}, ${pricing.price})
+        INSERT INTO pricing (id, name, market_id, price, dynamic_unit)
+        VALUES (uuid_generate_v4(), ${pricing.name}, ${pricing.market_id}, ${pricing.price}, ${pricing.dynamic_unit || 'none'})
         ON CONFLICT (id) DO NOTHING
         RETURNING *;
         `;
@@ -174,6 +189,21 @@ async function updateBalanceSheet(req, res) {
   }
 }
 
+async function deleteBalanceSheet(req, res) {
+  const id = req.params.id;
+  if (!id) {
+    return res.status(500).json('id is missing');
+  }
+  try {
+    const result = await sql`
+      DELETE FROM balanceSheets WHERE id=${id};
+    `;
+    res.status(200).json(result.rows);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+}
+
 async function getInvoices(req, res) {
   try {
     const result =
@@ -234,9 +264,25 @@ async function addInvoice(req, res) {
   }
 }
 
+async function deleteInvoice(req, res) {
+  const id = req.params.id;
+  if (!id) {
+    return res.status(500).json('id is missing');
+  }
+  try {
+    const result = await sql`
+      DELETE FROM invoices WHERE id=${id};
+    `;
+    res.status(200).json(result.rows);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+}
+
 module.exports = {
   getMarkets,
   addMarket,
+  deleteMarket,
   getCities,
   addCity,
   getPricings,
@@ -246,6 +292,8 @@ module.exports = {
   getBalanceSheets,
   addBalanceSheet,
   updateBalanceSheet,
+  deleteBalanceSheet,
   getInvoices,
   addInvoice,
+  deleteInvoice,
 };
