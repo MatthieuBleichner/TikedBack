@@ -159,9 +159,26 @@ async function addBalanceSheet(req, res) {
   }
 
   try {
+    const linkedMarket = (
+      await sql`SELECT * from markets WHERE id=${balance.market_id}`
+    ).rows[0];
+    const linkedCity = (
+      await sql`SELECT * from cities WHERE id=${linkedMarket.city_id}`
+    ).rows[0];
+
+    const balanceSheetDate = new Date(balance.date);
+    const currentCityPrefix = ('00' + linkedCity?.invoice_prefix).slice(-3);
+    const currentMarketPrefix = ('00' + linkedMarket?.invoice_prefix).slice(-3);
+    const currentMonthPrefix = ('0' + (balanceSheetDate.getMonth() + 1)).slice(
+      -2,
+    );
+
+    const currentDayPrefix = ('0' + balanceSheetDate.getDate()).slice(-2);
+    const fullInvoicePrefix = `${currentCityPrefix}-${currentMarketPrefix}-${balanceSheetDate.getFullYear()}${currentMonthPrefix}${currentDayPrefix}`;
+
     const result = await sql`
-          INSERT INTO balanceSheets (id, date, market_id)
-          VALUES (uuid_generate_v4(), ${balance.date}, ${balance.market_id})
+          INSERT INTO balanceSheets (id, date, market_id, invoice_prefix)
+          VALUES (uuid_generate_v4(), ${balance.date}, ${balance.market_id}, ${fullInvoicePrefix} )
           ON CONFLICT (id) DO NOTHING
           RETURNING *;
         `;
@@ -237,7 +254,7 @@ async function addInvoice(req, res) {
     $$;
   `;
 
-  // create balanceSheet table
+  // create invoices table
   await sql`
       CREATE TABLE IF NOT EXISTS invoices (
       id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -252,9 +269,21 @@ async function addInvoice(req, res) {
   `;
 
   try {
+    const linkedBalanceSheet = (
+      await sql`SELECT * from balanceSheets WHERE id=${details.balance_sheet_id}`
+    ).rows[0];
+
+    const invoicesLength = (
+      await sql`SELECT * from invoices WHERE balance_sheet_id=${details.balance_sheet_id}`
+    ).rows.length;
+
+    const formattedInvoiceLength = ('00000' + (invoicesLength + 1)).slice(-7);
+
+    const invoiceId = `${linkedBalanceSheet.invoice_prefix}-${formattedInvoiceLength}`;
+
     const result = await sql`
           INSERT INTO invoices (id, balance_sheet_id, client_id, total, paiement_type, invoice_id)
-          VALUES (uuid_generate_v4(), ${details.balance_sheet_id}, ${details.client_id}, ${details.total}, ${details.paiement_type}, ${details.invoice_id})
+          VALUES (uuid_generate_v4(), ${details.balance_sheet_id}, ${details.client_id}, ${details.total}, ${details.paiement_type}, ${invoiceId})
           ON CONFLICT (id) DO NOTHING
           RETURNING *;
         `;

@@ -415,6 +415,7 @@ async function seedCities() {
         id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
         date DATE NOT NULL,
         market_id UUID NOT NULL,
+        invoice_prefix VARCHAR(255),
         FOREIGN KEY (market_id) REFERENCES markets (id)
       );
     `;
@@ -449,14 +450,14 @@ async function seed() {
 }
 
 async function update() {
-  try {
-    await sql`
-      ALTER TABLE invoices
-      ADD paiement_type paiement_method
-  `;
-  } catch (error) {
-    console.error('Error updating clients:', error);
-    throw error;
-  }
+  // try {
+  //   await sql`
+  //     ALTER TABLE invoices
+  //     ADD paiement_type paiement_method
+  // `;
+  // } catch (error) {
+  //   console.error('Error updating clients:', error);
+  //   throw error;
+  // }
 }
 module.exports = { seed, update };
